@@ -7,12 +7,14 @@ var express = require('express');
 var parseurl = require('parseurl');
 var session = require('express-session');
 var bodyParser = require('body-parser');
+var favicon = require('serve-favicon');
 
 var config = require('./public/config/config');
 
 // Server part
 var app = express();
 app.use('/', express.static(path.join(__dirname, 'public')));
+app.use(favicon('./public/assets/img/fav/favicon.ico'));
 
 app.use(session({
     secret: 'gaurav zure pal',
