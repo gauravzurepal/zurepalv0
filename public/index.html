@@ -5,18 +5,40 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }
-      input { background: #efefef;
-        position: fixed;
-        top: 400px;
-        left: 425px;
-        padding: 10px;
-        width: 40%;
-        margin-right: .5%;
-        border: 2px solid #7d7d7d;
-        border-radius: 5px; }
+
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px;}
       #messages li:nth-child(odd) { background: #eee; }
+      .zure-container-box{
+        height: 586px;
+        position: relative;
+      }
+      .zure-container{
+        width: 586px !important;
+        margin-left:60px !important;
+        overflow-y: auto;
+        position: absolute !important;
+        padding-bottom: 0;
+        clear: both;
+        box-sizing: border-box;
+        height: 100%;
+      }
+      .zure-box{
+        background: #efefef;
+        position: absolute !important;
+        padding: 10px;
+        border: 2px solid #7d7d7d;
+        width: 600px !important;
+        border-radius: 5px;
+        padding-top:56px !important;
+        margin-left:60px !important;
+      }
+      .zure-row-box{
+        width: 578px;
+        margin-left: 5px;
+        border-radius: 15px !important;
+        margin-left: 1px !important;
+      }
     </style>
   </head>
   <body>
@@ -33,11 +55,12 @@
   <script src="https://npmcdn.com/jquery@3.1.0/dist/jquery.min.js"></script>
   <script src="https://npmcdn.com/remarkable@1.6.2/dist/remarkable.min.js"></script>
 
-  <script type="text/babel" src="js/app.js"></script>
+  <script type="text/babel" src="js/component.jsx"></script>
   <script type="text/babel">
       // To get started with this tutorial running your own code, simply remove
       // the script tag loading scripts/example.js and start writing code here.
   </script>
+  <link href="assets/css/materialize/css/materialize.min.css" media="all" rel="stylesheet" type="text/css" />
 
   <script>
       var socket = io();
