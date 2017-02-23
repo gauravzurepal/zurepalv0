@@ -10,11 +10,16 @@ var bodyParser = require('body-parser');
 var favicon = require('serve-favicon');
 
 var config = require('./public/config/config');
+var Promise = require("bluebird");
+
+var util = require('./src/utils');
 
 // Server part
 var app = express();
+console.log(__dirname);
+app.use(favicon(__dirname + '/public/assets/img/fav/favicon.ico'));
+
 app.use('/', express.static(path.join(__dirname, 'public')));
-app.use(favicon('./public/assets/img/fav/favicon.ico'));
 
 app.use(session({
     secret: 'gaurav zure pal',
@@ -79,6 +84,13 @@ app.post('/zure/start', function (req, res) {
         logger.info("unable to add socket id mapping with redis store");
     }
 
-    res.send('Sending... '+req.body.comment);
+    //util.getContent('https://api.wit.ai/message?q='+req.body.comment+'&access_token=K6IGHXBDFHO5VOV74BXSL2GFDV4RP7EU')
+    util.getApiAiContent(req.body.comment).then(function(data){
+        console.log("Data received from API.ai ", data);
+        //console.log("Api Response "+body.result.fullFillMent.speech);
+        res.send(data.result.fulfillment.speech);
+    });
 
 });
+
+module.exports = app;

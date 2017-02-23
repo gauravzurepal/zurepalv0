@@ -1,3 +1,4 @@
+var bot = false;
 var ZureContainer = React.createClass({
     render: function(){
         return (
@@ -19,21 +20,24 @@ var ZureList = React.createClass({
 
 var ZureListItem = React.createClass({
     render: function(){
+        console.log(bot);
         return (
-            <div className="row card-panel zure-row-box"><div className="col s12 blue-text text-darken-2">{this.props.children}</div></div>
+            (this.props.bot)? <div className="row card-panel zure-row-box bot"><div className="col s12">{this.props.children}</div></div> :
+                <div className="row card-panel zure-row-box"><div className="col s12">{this.props.children}</div></div>
+
         );
     }
 });
 
 var ZureComment = React.createClass({
     getInitialState: function() {
-        return {item: ''};
+        return {item: '', bot: false};
     },
     handleSubmit: function(e){
         e.preventDefault();
-        this.props.onFormSubmit(this.state.item);
-        this.setState({item: ''});
-        ReactDOM.findDOMNode(this.refs.item).focus();
+        //this.props.onFormSubmit(this.state.item);
+        //this.setState({item: ''});
+        //ReactDOM.findDOMNode(this.refs.item).focus();
         return;
     },
     _handleKeyPress: function(e) {
@@ -41,8 +45,14 @@ var ZureComment = React.createClass({
         if (e.key === 'Enter') {
 
             var comment = e.target.value;
+            //this.props.bot = false;
+            this.setState({bot:false});
+            this.props.onFormSubmit(comment);
+            this.setState({item: ''});
+            ReactDOM.findDOMNode(this.refs.item).focus();
 
             console.log("Text "+comment);
+            var $this = this;
             if(comment == 'hi'){
                 io.socket.get('/zure/hello', function gotResponse(data, jwRes) {
                     console.log('Server responded with status code ' + jwRes.statusCode + ' and data: ', data);
@@ -51,7 +61,14 @@ var ZureComment = React.createClass({
                 $.post('/zure/start', {comment:e.target.value}, function(response){
                     console.log("hello %o", (response));
                     document.getElementById('m').focus();
+
+                    //$this.props.bot = true;
+                    $this.setState({bot:true});
+                    $this.props.onFormSubmit(response);
+                    $this.setState({item: ''});
+                    ReactDOM.findDOMNode($this.refs.item).focus();
                 });
+
             }
 
         }
@@ -74,7 +91,7 @@ var ZureComment = React.createClass({
 
 var Zure = React.createClass({
     getInitialState: function() {
-        return {items: []};
+        return {items: [], bot: false};
     },
     updateItems: function(newItem) {
         var allItems = this.state.items.concat([newItem]);

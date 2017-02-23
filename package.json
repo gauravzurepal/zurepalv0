@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {},
   "dependencies": {
+    "apiai": "^4.0.0",
+    "bluebird": "^3.4.7",
     "body-parser": "^1.16.1",
     "express": "^4.14.1",
     "express-session": "^1.15.1",
