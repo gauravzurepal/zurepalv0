@@ -1,4 +1,3 @@
-var bot = false;
 var ZureContainer = React.createClass({
     render: function(){
         return (
@@ -7,47 +6,57 @@ var ZureContainer = React.createClass({
     }
 });
 
-var ZureList = React.createClass({
-    render: function() {
-        var createItem = function(itemText) {
+class ZMessages extends React.Component {
+    render(){
+        // Loop through all the messages in the state and create a Message component
+        const messages = this.props.items.map((message, i) => {
             return (
-                <ZureListItem>{itemText}</ZureListItem>
+                <ZMessage
+                    key={i}
+                    message={message.message}
+                    fromMe={message.fromMe} />
             );
-        };
-        return <div className="zure-container-box"><div className="container zure-container">{this.props.items.map(createItem)}</div></div>;
+        });
+
+        return <div className="zure-container-box"><div className="container zure-container">{messages}</div></div>;
     }
-});
+}
 
-var ZureListItem = React.createClass({
-    render: function(){
-        console.log(bot);
+
+class ZMessage extends React.Component {
+    render(){
+        console.log("..");
+        const fromMe = this.props.fromMe ? 'bot' : '';
         return (
-            (this.props.bot)? <div className="row card-panel zure-row-box bot"><div className="col s12">{this.props.children}</div></div> :
-                <div className="row card-panel zure-row-box"><div className="col s12">{this.props.children}</div></div>
-
+            <div className={`row card-panel zure-row-box ${fromMe}`}><div className="col s12">{this.props.message}</div></div>
         );
     }
-});
+}
+ZMessage.defaultProps = {
+    message: '',
+    fromMe: false
+};
 
-var ZureComment = React.createClass({
-    getInitialState: function() {
-        return {item: '', bot: false};
-    },
-    handleSubmit: function(e){
+class ZureComment extends React.Component {
+    constructor(props) {
+        super(props);
+        this.item = '';
+        this.state = { bot: false };
+
+        this._handleKeyPress = this._handleKeyPress.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+    handleSubmit(e){
         e.preventDefault();
-        //this.props.onFormSubmit(this.state.item);
-        //this.setState({item: ''});
-        //ReactDOM.findDOMNode(this.refs.item).focus();
         return;
-    },
-    _handleKeyPress: function(e) {
+    }
+    _handleKeyPress(e){
         this.setState({item: e.target.value});
         if (e.key === 'Enter') {
 
             var comment = e.target.value;
-            //this.props.bot = false;
-            this.setState({bot:false});
-            this.props.onFormSubmit(comment);
+
+            this.props.onFormSubmit(comment, false);
             this.setState({item: ''});
             ReactDOM.findDOMNode(this.refs.item).focus();
 
@@ -63,8 +72,7 @@ var ZureComment = React.createClass({
                     document.getElementById('m').focus();
 
                     //$this.props.bot = true;
-                    $this.setState({bot:true});
-                    $this.props.onFormSubmit(response);
+                    $this.props.onFormSubmit(response, true);
                     $this.setState({item: ''});
                     ReactDOM.findDOMNode($this.refs.item).focus();
                 });
@@ -72,8 +80,9 @@ var ZureComment = React.createClass({
             }
 
         }
-    },
-    render: function(){
+    }
+
+    render(){
         return (
             <form onSubmit={this.handleSubmit}>
                 <input
@@ -87,26 +96,33 @@ var ZureComment = React.createClass({
             </form>
         );
     }
-});
+}
 
-var Zure = React.createClass({
-    getInitialState: function() {
-        return {items: [], bot: false};
-    },
-    updateItems: function(newItem) {
-        var allItems = this.state.items.concat([newItem]);
+class Zure extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {items: [], bot: false} ;
+
+        this.updateItems = this.updateItems.bind(this);
+    }
+
+    updateItems(newItem, fromMe){
+        var newMessage = {message : newItem, fromMe:fromMe};
+        var allItems = this.state.items.concat([newMessage]);
         this.setState({
             items: allItems
         });
-    },
-    render: function() {
+    }
+
+    render(){
         return (
             <div>
-                <ZureList key={this.state.items}  items={this.state.items}/>
+                <ZMessages key={this.state.items}  items={this.state.items}/>
                 <ZureComment onFormSubmit={this.updateItems}/>
             </div>
         );
     }
-});
+
+}
 
 ReactDOM.render(<Zure/>, document.getElementById('content'));
