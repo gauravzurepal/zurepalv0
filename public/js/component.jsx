@@ -61,16 +61,21 @@ class ZureComment extends React.Component {
             ReactDOM.findDOMNode(this.refs.item).focus();
 
             console.log("Text "+comment);
+
             var $this = this;
+            var zureBox = $('.zure-box');
+
             if(comment == 'hi'){
                 io.socket.get('/zure/hello', function gotResponse(data, jwRes) {
                     console.log('Server responded with status code ' + jwRes.statusCode + ' and data: ', data);
                 });
             }else{
-                $.post('/zure/start', {comment:e.target.value}, function(response){
-                    console.log("hello %o", (response));
-                    document.getElementById('m').focus();
+                this.uuid = zureBox.attr('data-uuid');
 
+                $.post('/zure/start', {comment:e.target.value, uuid: this.uuid}, function(response){
+                    console.log("hello %o", (response));
+                    zureBox.val('').focus();
+                    zureBox.attr('placeholder', '');
                     //$this.props.bot = true;
                     $this.props.onFormSubmit(response, true);
                     $this.setState({item: ''});
@@ -92,6 +97,7 @@ class ZureComment extends React.Component {
                     type="text"
                     placeholder="What is your name pal?"
                     onKeyPress={this._handleKeyPress}
+                    data-uuid="0"
                 />
             </form>
         );

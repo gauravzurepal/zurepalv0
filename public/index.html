@@ -49,7 +49,7 @@
 
   </body>
 
-  <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+  <!--<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>-->
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="https://npmcdn.com/react@15.3.1/dist/react.js"></script>
   <script src="https://npmcdn.com/react-dom@15.3.1/dist/react-dom.js"></script>
@@ -65,14 +65,20 @@
   <link href="assets/css/materialize/css/materialize.min.css" media="all" rel="stylesheet" type="text/css" />
 
   <script>
-      var socket = io();
-      $('form').submit(function(){
-          socket.emit('chat message', $('#m').val());
-          $('#m').val('');
-          return false;
+      $(function () {
+          // load the ajax java script
+          var formData = {};
+          $.ajax({
+              type: 'GET',
+              url: '/zure/init',
+              data: formData,
+              async: true,
+              success: function (response) {
+                  //console.log("backend load completed successfully");
+                  $('.zure-box').attr('data-uuid', response.uuid);
+              }
+          });
       });
-      socket.on('chat message', function(msg){
-          $('#messages').append($('<li>').text(msg));
-      });
+
   </script>
 </html>

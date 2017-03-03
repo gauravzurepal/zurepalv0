@@ -13,6 +13,9 @@ var config = require('./public/config/config');
 var Promise = require("bluebird");
 
 var util = require('./src/utils');
+var cache = require('./src/cache/cache');
+var uuidV4 = require('uuid/v4');
+
 
 // Server part
 var app = express();
@@ -36,11 +39,11 @@ console.log('Server listening on port 80');
 // Socket.IO part
 var io = require('socket.io')(server);
 
-var redis = require('redis');
+//var redis = require('redis');
 
-var redisClient = redis.createClient(config.redisPort, config.redisHost);
+//var redisClient = redis.createClient(config.redisPort, config.redisHost);
 
-redisClient.auth(config.redisPassword, function (err) { if (err) logger.info("redis connection error"); });
+//redisClient.auth(config.redisPassword, function (err) { if (err) logger.info("redis connection error"); });
 
 var sendComments = function (socket) {
     fs.readFile('_comments.json', 'utf8', function(err, comments) {
@@ -72,26 +75,30 @@ app.post('/zure/hello', function (req, res) {
     res.send('Got a POST request')
 });
 
+app.get('/zure/init', function (req, res) {
+    res.send({uuid:uuidV4()})
+});
+
 app.post('/zure/start', function (req, res) {
-    console.log("request coming here", req.body.comment);
+    console.log("request coming here %o", req.body.uuid);
 
     /***
      * Store the name in redis
      */
     try{
-        redisClient.get(req.session.id, function (err, result) {
-            if(typeof result !== 'undefined' && result !== null){
-                redisClient.set(req.session.id, {name:req.body.comment}, redis.print);
-                //util.getContent('https://api.wit.ai/message?q='+req.body.comment+'&access_token=K6IGHXBDFHO5VOV74BXSL2GFDV4RP7EU')
-                util.getApiAiContent(req.body.comment).then(function(data){
-                    console.log("Data received from API.ai ", data);
-                    //console.log("Api Response "+body.result.fullFillMent.speech);
-                    res.send(data.result.fulfillment.speech);
-                });
-            }else{
-                res.send("Nice to meet you, "+req.body.comment+"!, I am a bot and have name like you, human calls me Zure. I discuss algorithms and love to help if you have a question for me. You can ask-- Array rotation, stack, remove duplicates..  ");
-            }
-        });
+        var result = cache.get(req.body.uuid);
+        console.log("Cache value " + result);
+        if(typeof result !== 'undefined' && result !== null){
+            //util.getContent('https://api.wit.ai/message?q='+req.body.comment+'&access_token=K6IGHXBDFHO5VOV74BXSL2GFDV4RP7EU')
+            util.getApiAiContent(req.body.comment).then(function(data){
+                console.log("Data received from API.ai ", data);
+                //console.log("Api Response "+body.result.fullFillMent.speech);
+                res.send(data.result.fulfillment.speech);
+            });
+        }else{
+            res.send("Nice to meet you, "+req.body.comment+"!, I am a bot and have name like you, human calls me Zure. I discuss algorithms and love to help if you have a question for me. You can ask-- Array rotation, stack, remove duplicates..  ");
+            cache.put(req.body.uuid, {name:req.body.comment});
+        }
     }catch (err){
         logger.info("unable to add socket id mapping with redis store");
     }
