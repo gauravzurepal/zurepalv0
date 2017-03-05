@@ -18,7 +18,16 @@ class ZMessages extends React.Component {
             );
         });
 
-        return <div className="zure-container-box"><div className="container zure-container">{messages}</div></div>;
+        return <div className="container zure-container-box">
+                <div className="row">
+                    <div className="col s6">
+                        <div className="container zure-container">{messages}</div>
+                    </div>
+                    <div className="col s6">
+                        <div className="container zure-container zure-response"></div>
+                    </div>
+                </div>
+            </div>;
     }
 }
 
@@ -65,24 +74,18 @@ class ZureComment extends React.Component {
             var $this = this;
             var zureBox = $('.zure-box');
 
-            if(comment == 'hi'){
-                io.socket.get('/zure/hello', function gotResponse(data, jwRes) {
-                    console.log('Server responded with status code ' + jwRes.statusCode + ' and data: ', data);
-                });
-            }else{
-                this.uuid = zureBox.attr('data-uuid');
+            this.uuid = zureBox.attr('data-uuid');
 
-                $.post('/zure/start', {comment:e.target.value, uuid: this.uuid}, function(response){
-                    console.log("hello %o", (response));
-                    zureBox.val('').focus();
-                    zureBox.attr('placeholder', '');
-                    //$this.props.bot = true;
-                    $this.props.onFormSubmit(response, true);
-                    $this.setState({item: ''});
-                    ReactDOM.findDOMNode($this.refs.item).focus();
-                });
-
-            }
+            $.post('/zure/start', {comment:e.target.value, uuid: this.uuid}, function(response){
+                console.log("hello %o", (response));
+                zureBox.val('').focus();
+                zureBox.attr('placeholder', '');
+                //$this.props.bot = true;
+                $this.props.onFormSubmit(response, true);
+                $this.setState({item: ''});
+                ReactDOM.findDOMNode($this.refs.item).focus();
+                $('.zure-container').animate({scrollTop: '0px'}, 10);
+            });
 
         }
     }

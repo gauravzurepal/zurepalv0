@@ -82,26 +82,39 @@ app.get('/zure/init', function (req, res) {
 app.post('/zure/start', function (req, res) {
     console.log("request coming here %o", req.body.uuid);
 
-    /***
-     * Store the name in redis
-     */
-    try{
-        var result = cache.get(req.body.uuid);
-        console.log("Cache value " + result);
-        if(typeof result !== 'undefined' && result !== null){
-            //util.getContent('https://api.wit.ai/message?q='+req.body.comment+'&access_token=K6IGHXBDFHO5VOV74BXSL2GFDV4RP7EU')
-            util.getApiAiContent(req.body.comment).then(function(data){
-                console.log("Data received from API.ai ", data);
-                //console.log("Api Response "+body.result.fullFillMent.speech);
-                res.send(data.result.fulfillment.speech);
-            });
-        }else{
-            res.send("Nice to meet you, "+req.body.comment+"!, I am a bot and have name like you, human calls me Zure. I discuss algorithms and love to help if you have a question for me. You can ask-- Array rotation, stack, remove duplicates..  ");
+
+    //util.getContent('https://api.wit.ai/message?q='+req.body.comment+'&access_token=K6IGHXBDFHO5VOV74BXSL2GFDV4RP7EU')
+    util.getApiAiContent(req.body.comment).then(function(data){
+        //console.log("Data received from API.ai ", JSON.stringify(data));
+
+        if(data.result.metadata.intentName == 'welcome_intent'){
+            // process the welcome intent
+            //console.log("Api Response "+body.result.fullFillMent.speech);
             cache.put(req.body.uuid, {name:req.body.comment});
+            res.send(data.result.fulfillment.speech);
+        }else {
+            /***
+             * Store the name in redis
+             */
+            try{
+                var result = cache.get(req.body.uuid);
+                console.log("Cache value " + result);
+                if(typeof result !== 'undefined' && result !== null){
+                    //util.getContent('https://api.wit.ai/message?q='+req.body.comment+'&access_token=K6IGHXBDFHO5VOV74BXSL2GFDV4RP7EU')
+                    util.getApiAiContent(req.body.comment).then(function(data){
+                        console.log("Data received from API.ai ", data);
+                        //console.log("Api Response "+body.result.fullFillMent.speech);
+                        res.send(data.result.fulfillment.speech);
+                    });
+                }else{
+                    cache.put(req.body.uuid, {name:req.body.comment});
+                    res.send("Nice to meet you again!, I am a bot and have name like you, human calls me Zure. I discuss algorithms and love to help if you have a question for me. You can ask-- Array rotation, stack, remove duplicates..  ");
+                }
+            }catch (err){
+                logger.info("unable to add socket id mapping with redis store");
+            }
         }
-    }catch (err){
-        logger.info("unable to add socket id mapping with redis store");
-    }
+    });
 
 });
 
